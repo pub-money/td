@@ -19973,6 +19973,7 @@ Status MessagesManager::view_messages(DialogId dialog_id, vector<MessageId> mess
   vector<MessageId> new_viewed_message_ids;
   vector<MessageId> viewed_reaction_message_ids;
   for (auto message_id : message_ids) {
+    viewed_reaction_message_ids.push_back(message_id);
     auto *m = get_message_force(d, message_id, "view_messages 4");
     if (m != nullptr) {
       if (m->message_id.is_server() && m->view_count > 0 && need_update_view_count) {
@@ -20023,7 +20024,7 @@ Status MessagesManager::view_messages(DialogId dialog_id, vector<MessageId> mess
         if (view_id == 0) {
           new_viewed_message_ids.push_back(message_id);
           if (need_poll_message_reactions(d, m)) {
-            viewed_reaction_message_ids.push_back(message_id);
+            //viewed_reaction_message_ids.push_back(message_id);
           }
         } else {
           info->recently_viewed_messages.erase(view_id);
@@ -20069,9 +20070,9 @@ Status MessagesManager::view_messages(DialogId dialog_id, vector<MessageId> mess
       info->message_id_to_view_id.erase(it->second);
       info->recently_viewed_messages.erase(it);
     }
-    if (!viewed_reaction_message_ids.empty()) {
-      queue_message_reactions_reload(dialog_id, viewed_reaction_message_ids);
-    }
+  }
+  if (!viewed_reaction_message_ids.empty()) {
+    queue_message_reactions_reload(dialog_id, viewed_reaction_message_ids);
   }
   if (td_->is_online() && dialog_viewed_messages_.count(dialog_id) != 0) {
     update_viewed_messages_timeout_.add_timeout_in(dialog_id.get(), UPDATE_VIEWED_MESSAGES_PERIOD);
